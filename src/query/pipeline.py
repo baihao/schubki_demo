@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import pycolmap
-from hloc_bridge import workspace_from_rig_sfm_dir
 from hloc_bridge.config import HlocRuntimeConfig, LocalizationConfig
 from hloc_bridge.global_retrieval import (
     database_names_from_loc_pairs,
@@ -100,38 +99,42 @@ def run_query_localization(
     )
     gt_camera = infer_query_camera(cfg.paths.images_root / query_name, spec.camera)
 
-    ws = workspace_from_rig_sfm_dir(
-        cfg.paths.rig_sfm_dir,
-        feature_conf_name=cfg.feature_conf_name,
-        matcher_conf_name=cfg.matcher_conf_name,
-    )
-    ws.bootstrap()
+    if cfg.refresh_map_global_descriptors:
+        ensure_map_global_descriptors(
+            cfg.paths.images_root,
+            map_names,
+            cfg.paths.global_features,
+            retrieval_conf_name=cfg.retrieval_conf_name,
+        )
+    elif not cfg.paths.global_features.is_file():
+        raise FileNotFoundError(
+            f"Missing {cfg.paths.global_features}; run feature_pairs first "
+            "or set refresh_map_global_descriptors=True"
+        )
 
-    ensure_map_global_descriptors(
-        cfg.paths.images_root,
-        map_names,
-        cfg.paths.global_features,
-        retrieval_conf_name=cfg.retrieval_conf_name,
-    )
+    query_matcher = cfg.query_matcher_conf_name or cfg.matcher_conf_name
     prepare_hierarchical_query_localization(
         cfg.paths.images_root,
         query_name,
         map_names,
         cfg.paths.features,
         cfg.paths.global_features,
-        cfg.paths.matches,
+        cfg.paths.matches_loc,
         cfg.paths.loc_pairs,
         retrieval_top_k=cfg.retrieval_top_k,
         feature_conf_name=cfg.feature_conf_name,
-        matcher_conf_name=cfg.matcher_conf_name,
+        matcher_conf_name=query_matcher,
         retrieval_conf_name=cfg.retrieval_conf_name,
+        overwrite_local=cfg.overwrite_query_descriptors,
+        overwrite_global_query=cfg.overwrite_query_descriptors,
+        overwrite_matches=cfg.overwrite_loc_matches,
     )
 
     retrieved_db = database_names_from_loc_pairs(cfg.paths.loc_pairs, query_name)
     retrieval = rank_keyframes_by_matches(
         query_name,
         retrieved_db,
-        cfg.paths.matches,
+        cfg.paths.matches_loc,
         top_k=cfg.retrieval_top_k,
         keyframes=keyframes,
     )
@@ -148,7 +151,7 @@ def run_query_localization(
         cfg.paths.images_root,
         query_name,
         cfg.paths.features,
-        cfg.paths.matches,
+        cfg.paths.matches_loc,
         reference_names=ref_names,
         localization_config=loc_cfg.localizer_config(),
         query_camera=gt_camera,

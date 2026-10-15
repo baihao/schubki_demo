@@ -27,7 +27,8 @@ v2.0/
 │   └── query/          # NetVLAD 检索 + 局部匹配 + PnP
 ├── scripts/            # CLI 与 env
 └── test/
-    └── pipeline_one_minute.ipynb   # 推荐 demo（20 s 片段 + 可视化）
+    ├── pipeline_one_minute.ipynb   # 全流程 demo（20 s 片段）
+    └── query_fast_demo.ipynb       # gap=3 建图 + Fast query
 ```
 
 ---
@@ -110,7 +111,7 @@ python scripts/smoke_test_robotcar.py
 
 ## Demo 方式 A：Jupyter（推荐，含 3D 可视化）
 
-端到端 notebook：**[test/pipeline_one_minute.ipynb](test/pipeline_one_minute.ipynb)**
+端到端 notebook：**[test/pipeline_one_minute.ipynb](test/pipeline_one_minute.ipynb)** · 快速建图+定位：**[test/query_fast_demo.ipynb](test/query_fast_demo.ipynb)**（`max_temporal_gap=3` + `QueryConfig.fast()`）
 
 | 步骤 | 内容 |
 |------|------|
@@ -224,6 +225,7 @@ python scripts/run_query.py \
 | macOS query 段 SIGSEGV / OpenMP | 确认 `KMP_DUPLICATE_LIB_OK=TRUE`；NetVLAD 首次下载完成后重跑 §4 |
 | 三角化 0 点 | 确认已执行 `apply_schubki_hloc_patches.sh`（含 `calibrated_two_view_geometry`） |
 | 无 GPU | hloc 补丁支持 **MPS（Apple GPU）** 或 CPU，速度较慢 |
+| **Query 很慢** | 见 [src/query/README.md](src/query/README.md)：``--fast`` / ``QueryConfig.fast()``（`NN-mutual` + 小 k）、确保建图已有 ``global_features.h5``、重复 query 勿加 ``--force`` |
 | `git status` 显示 `third_party/Hierarchical-Localization` modified | **正常**：补丁打在 submodule 工作区里，**不要** `git add third_party/…` 提交。可提交的只有父仓库里的 **`patches/hloc/`**；clone 后跑 `apply_schubki_hloc_patches.sh`。`.gitmodules` 已对 hloc 设置 `ignore = dirty` |
 
 ### Submodule 与补丁（不要提交 third_party 内改动）

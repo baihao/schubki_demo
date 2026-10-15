@@ -84,6 +84,7 @@ def prepare_hierarchical_query_localization(
     retrieval_conf_name: str = "netvlad",
     overwrite_local: bool = True,
     overwrite_global_query: bool = True,
+    overwrite_matches: bool = True,
 ) -> Path:
     """
     hloc-style localization prep: global retrieval prior, then local match on top-k only.
@@ -120,6 +121,6 @@ def prepare_hierarchical_query_localization(
         features_path,
         matches_path,
         matcher_conf_name=matcher_conf_name,
-        overwrite=True,
+        overwrite=overwrite_matches,
     )
     return loc_pairs_path

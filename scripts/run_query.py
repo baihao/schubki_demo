@@ -28,13 +28,35 @@ def main() -> None:
         default="left",
     )
     p.add_argument("--retrieval-top-k", type=int, default=5)
+    p.add_argument(
+        "--fast",
+        action="store_true",
+        help="top-k=3, NN-mutual matcher, reuse cached query/loc h5 when possible",
+    )
+    p.add_argument(
+        "--query-matcher",
+        default=None,
+        help="hloc matcher conf for loc pairs only (e.g. NN-mutual, disk+lightglue)",
+    )
+    p.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-extract query descriptors and re-match loc pairs",
+    )
     args = p.parse_args()
 
     spec = QueryImageSpec(timestamp_us=args.ts, camera=args.camera)
-    cfg = QueryConfig(
-        paths=QueryWorkspacePaths(rig_sfm_dir=args.rig_sfm_dir),
-        retrieval_top_k=args.retrieval_top_k,
-    )
+    paths = QueryWorkspacePaths(rig_sfm_dir=args.rig_sfm_dir)
+    if args.fast:
+        cfg = QueryConfig.fast(paths, retrieval_top_k=min(args.retrieval_top_k, 3))
+    else:
+        cfg = QueryConfig(
+            paths=paths,
+            retrieval_top_k=args.retrieval_top_k,
+            query_matcher_conf_name=args.query_matcher,
+            overwrite_query_descriptors=args.force,
+            overwrite_loc_matches=args.force,
+        )
     result = run_query_localization(spec, cfg)
 
     print(f"Query: {result.query_name}")

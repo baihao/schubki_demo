@@ -5,6 +5,8 @@ from typing import List, Union
 
 from hloc import match_features
 
+from .model_cache import match_features_cached
+
 
 def resolve_matcher_conf(name: str) -> dict:
     if name not in match_features.confs:
@@ -22,9 +24,18 @@ def match_image_pairs(
     matcher_conf_name: str = "disk+lightglue",
     matcher_conf: dict | None = None,
     overwrite: bool = False,
+    use_model_cache: bool = True,
 ) -> Path:
-    """Wrap ``hloc.match_features.main`` (demo notebook match cell)."""
+    """Wrap hloc matching; caches matcher for the process lifetime."""
     conf = matcher_conf or resolve_matcher_conf(matcher_conf_name)
+    if use_model_cache:
+        return match_features_cached(
+            conf,
+            Path(pairs_path),
+            Path(features_path),
+            Path(matches_path),
+            overwrite=overwrite,
+        )
     return match_features.main(
         conf,
         Path(pairs_path),

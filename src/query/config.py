@@ -48,6 +48,11 @@ class QueryWorkspacePaths:
     def global_features(self) -> Path:
         return self.rig_sfm_dir / "global_features.h5"
 
+    @property
+    def matches_loc(self) -> Path:
+        """Query-only matches (avoid rewriting the large mapping ``matches.h5``)."""
+        return self.rig_sfm_dir / "matches_loc.h5"
+
 
 @dataclass
 class QueryConfig:
@@ -60,14 +65,39 @@ class QueryConfig:
     ransac_max_error: float = 12.0
     retrieval_top_k: int = 5
     """Global retrieval prior (NetVLAD): top-k DB images for local matching."""
+    query_matcher_conf_name: Optional[str] = None
+    """Matcher for query loc pairs only; ``None`` → ``matcher_conf_name``."""
     pnp_max_db_images: Optional[int] = None
     """Cap map images for PnP; ``None`` = all keyframe map names in the model."""
+    refresh_map_global_descriptors: bool = False
+    """If False, skip NetVLAD on map at query time (use ``feature_pairs`` ``global_features.h5``)."""
+    overwrite_query_descriptors: bool = False
+    """Re-extract NetVLAD + DISK for the query image if already in h5."""
+    overwrite_loc_matches: bool = False
+    """Re-run matcher on loc pairs; False reuses ``matches_loc.h5`` when pairs unchanged."""
     left_stereo_dir: Path = field(
         default_factory=lambda: DEFAULT_LEFT_IMAGES
     )
     right_stereo_dir: Path = field(
         default_factory=lambda: DEFAULT_RIGHT_IMAGES
     )
+
+    @classmethod
+    def fast(
+        cls,
+        paths: QueryWorkspacePaths,
+        *,
+        retrieval_top_k: int = 3,
+    ) -> QueryConfig:
+        """Fewer loc pairs + mutual NN matching (much faster than LightGlue on query)."""
+        return cls(
+            paths=paths,
+            retrieval_top_k=retrieval_top_k,
+            query_matcher_conf_name="NN-mutual",
+            refresh_map_global_descriptors=False,
+            overwrite_query_descriptors=False,
+            overwrite_loc_matches=False,
+        )
 
 
 @dataclass(frozen=True)

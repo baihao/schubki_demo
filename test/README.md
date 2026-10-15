@@ -2,7 +2,8 @@
 
 | 文件 | 说明 |
 |------|------|
-| `pipeline_one_minute.ipynb` | 1 分钟片段 → rig_pairs → feature_pairs → 地图 3D 可视化 → query 定位 |
+| `pipeline_one_minute.ipynb` | 20 s 片段 → rig_pairs → feature_pairs → 地图 3D → query（LightGlue） |
+| `query_fast_demo.ipynb` | 2 min 建图（`max_temporal_gap=3`）+ **Fast query**（`QueryConfig.fast()`）→ `outputs/segment_2min_gap3_rig/` |
 
 **Kernel：** `SchubKI v2.0`（kernelspec 名 `schubki-v2`）
 
