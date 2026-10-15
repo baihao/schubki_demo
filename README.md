@@ -224,6 +224,23 @@ python scripts/run_query.py \
 | macOS query 段 SIGSEGV / OpenMP | 确认 `KMP_DUPLICATE_LIB_OK=TRUE`；NetVLAD 首次下载完成后重跑 §4 |
 | 三角化 0 点 | 确认已执行 `apply_schubki_hloc_patches.sh`（含 `calibrated_two_view_geometry`） |
 | 无 GPU | hloc 补丁支持 **MPS（Apple GPU）** 或 CPU，速度较慢 |
+| `git status` 显示 `third_party/Hierarchical-Localization` modified | **正常**：补丁打在 submodule 工作区里，**不要** `git add third_party/…` 提交。可提交的只有父仓库里的 **`patches/hloc/`**；clone 后跑 `apply_schubki_hloc_patches.sh`。`.gitmodules` 已对 hloc 设置 `ignore = dirty` |
+
+### Submodule 与补丁（不要提交 third_party 内改动）
+
+| 目录 | 父仓库记录什么 | 本地额外步骤 |
+|------|----------------|--------------|
+| `third_party/robotcar-dataset-sdk` | 固定 **upstream 的 commit SHA** | 一般无需改 |
+| `third_party/Hierarchical-Localization` | 同上（cvg 官方 commit） | **`bash scripts/apply_schubki_hloc_patches.sh`** 覆盖 MPS / 三角化等 |
+
+SchubKI 的 hloc 差异保存在 **`patches/hloc/`**，不要进 submodule 里 commit，也不要把「打过补丁的 submodule 指针」推上 GitHub（除非你自己 fork 了 hloc 并改 submodule URL）。
+
+恢复 submodule 到官方干净树（会清掉本地补丁，需再 apply）：
+
+```bash
+git submodule update --init third_party/Hierarchical-Localization
+bash scripts/apply_schubki_hloc_patches.sh
+```
 
 ---
 

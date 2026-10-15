@@ -4,3 +4,5 @@
 [submodule "third_party/Hierarchical-Localization"]
 	path = third_party/Hierarchical-Localization
 	url = https://github.com/cvg/Hierarchical-Localization.git
+	# Local SchubKI patches (scripts/apply_schubki_hloc_patches.sh) — do not commit inside submodule.
+	ignore = dirty
