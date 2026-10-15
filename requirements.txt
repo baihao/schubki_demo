@@ -1,0 +1,46 @@
+# SchubKI v2.0 — full runtime (rig_pairs, feature_pairs, hloc DISK+LightGlue, pycolmap)
+#
+# Recreate venv (from v2.0/):
+#   python3.12 -m venv .venv-schubki-v2
+#   source .venv-schubki-v2/bin/activate
+#   python -m pip install -U pip
+#   git submodule update --init --recursive
+#   bash scripts/apply_schubki_hloc_patches.sh
+#   python -m pip install -r requirements.txt
+#
+# With conda ``(base)`` active, plain ``pip`` may hit Python 3.9 user site — always use
+# ``python -m pip`` from this venv (or: .venv-schubki-v2/bin/python -m pip …).
+#
+# Optional exact pin (same machine / CI): pip install -r requirements-lock.txt
+#
+# Runtime env (macOS + torch + pycolmap OpenMP):
+#   source scripts/env.sh
+#
+# Third-party checkouts (if not using submodules):
+#   bash scripts/setup_robotcar_sdk.sh
+#   bash scripts/setup_hloc.sh
+
+# --- hloc upstream (editable install from submodule) ---
+-e third_party/Hierarchical-Localization
+
+# hloc imports packaging but upstream requirements.txt omits it
+packaging>=24
+
+# --- hloc 1.5 stack (keep aligned with third_party/Hierarchical-Localization/requirements.txt) ---
+torch>=1.1
+torchvision>=0.3
+numpy>=1.24
+opencv-python>=4.5
+tqdm>=4.36.0
+matplotlib>=3.5
+plotly>=5.0
+scipy>=1.10
+h5py>=3.0
+pycolmap>=3.13.0
+kornia>=0.6.11
+gdown>=4.0
+# lightglue: installed via hloc submodule (third_party/.../requirements.txt); do not pin twice here.
+
+# robotcar (src/robotcar) raw Bayer demosaic
+colour-demosaicing>=0.2.0
+Pillow>=10.0

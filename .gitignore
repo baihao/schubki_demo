@@ -1,0 +1,8 @@
+.venv/
+.venv-schubki-v2/
+test/outputs/
+model_cache/
+outputs/
+__pycache__/
+*.pyc
+.DS_Store
