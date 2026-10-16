@@ -35,6 +35,7 @@ python scripts/run_query.py -d outputs/rig_sfm --ts 1400075229218675 --force
 | **`refresh_map_global_descriptors=False`**（默认） | query 时不再给全地图重算 NetVLAD |
 | **Query 用 `NN-mutual`，建图仍用 `disk+lightglue`** | 通过 `query_matcher_conf_name` 与 `matcher_conf_name` 分离 |
 | **硬件** | CUDA / MPS；NetVLAD 权重缓存在 `model_cache/torch_hub` |
+| **`covisibility_clustering=True`** | 检索帧按 SfM 共视分簇，分别 PnP，取 inlier 最多的簇（减少远帧污染） |
 
 **模型缓存（默认开启）：** `hloc_bridge.features` / `matching` 经 `model_cache` 复用 NetVLAD、DISK、Matcher；同一 Python 进程 / Jupyter kernel 下多帧 query **不会每帧重新 load**。重启 kernel 后首次仍会加载一次。可 `from hloc_bridge.model_cache import clear_model_cache, cached_models_summary`。
 

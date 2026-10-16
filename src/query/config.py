@@ -75,6 +75,8 @@ class QueryConfig:
     """Re-extract NetVLAD + DISK for the query image if already in h5."""
     overwrite_loc_matches: bool = False
     """Re-run matcher on loc pairs; False reuses ``matches_loc.h5`` when pairs unchanged."""
+    covisibility_clustering: bool = True
+    """Split retrieved DB frames by SfM covisibility; PnP per cluster, keep max inliers."""
     left_stereo_dir: Path = field(
         default_factory=lambda: DEFAULT_LEFT_IMAGES
     )
@@ -97,6 +99,7 @@ class QueryConfig:
             refresh_map_global_descriptors=False,
             overwrite_query_descriptors=False,
             overwrite_loc_matches=False,
+            covisibility_clustering=True,
         )
 
 

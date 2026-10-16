@@ -31,6 +31,8 @@ class QueryLocalizationResult:
     retrieval: List[RetrievedKeyframe]
     predicted: QueryPoseResult
     pnp_ret: Optional[Dict[str, Any]]
+    num_covisibility_clusters: Optional[int] = None
+    best_covisibility_cluster: Optional[int] = None
 
 
 def _materialize_query_image(spec: QueryImageSpec, cfg: QueryConfig) -> Path:
@@ -156,6 +158,7 @@ def run_query_localization(
         localization_config=loc_cfg.localizer_config(),
         query_camera=gt_camera,
         infer_camera=False,
+        covisibility_clustering=cfg.covisibility_clustering,
     )
 
     pnp_ret = predicted.log.get("PnP_ret") if predicted.log else None
@@ -168,4 +171,6 @@ def run_query_localization(
         retrieval=retrieval,
         predicted=predicted,
         pnp_ret=pnp_ret,
+        num_covisibility_clusters=predicted.log.get("num_clusters"),
+        best_covisibility_cluster=predicted.log.get("best_cluster"),
     )
